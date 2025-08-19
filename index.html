@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+<meta charset="UTF-8" />
+<title>문장 간단 복사</title>
+<meta name="color-scheme" content="dark light">
+<link rel="icon" type="image/png" href="https://cdn.discordapp.com/attachments/1407222671120400438/1407309005344346223/sgfdh.png?ex=68a5a225&is=68a450a5&hm=c37740d17d2edb35511f09fd68da682bedf87931e4dd3e60d741ea7d4c2941c8&" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* -------------------------
+     基本背景設定
+     基本　システム設定　・　ライト・ダークモード
+  -------------------------- */
+  :root {
+    --bg: #0b0d12;
+    --surface: #0f1320;
+    --elev-1: #12182a;
+    --elev-2: #151c31;
+    --border: #1e2740;
+    --accent: #7aa2ff;
+    --accent-weak: #7aa2ff22;
+    --txt: #e9edfb;
+    --txt-muted: #9fb0d1;
+    --danger: #ff6b6b;
+    --toast-bg: rgba(16, 22, 36, .9);
+    --ring: 0 0 0 2px var(--accent-weak);
+    --shadow-1: 0 8px 24px rgba(0,0,0,.25);
+    --shadow-2: 0 20px 40px rgba(0,0,0,.35);
+    --radius: 14px;
+  }
+  :root[data-theme="light"] {
+    --bg: #f6f7fb;
+    --surface: #ffffff;
+    --elev-1: #ffffff;
+    --elev-2: #ffffff;
+    --border: #e6e8f0;
+    --accent: #3b82f6;
+    --accent-weak: #3b82f622;
+    --txt: #0f172a;
+    --txt-muted: #6b7280;
+    --danger: #ef4444;
+    --toast-bg: rgba(15, 23, 42, .92);
+    --shadow-1: 0 8px 24px rgba(15,23,42,.08);
+    --shadow-2: 0 24px 48px rgba(15,23,42,.12);
+  }
+
+    /* ウィンドウリセット */
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+
+      /* ウィンドウ基本設定 */
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+    color: var(--txt);
+    background:
+      radial-gradient(1200px 800px at 80% -10%, #3b82f610, transparent 60%),
+      radial-gradient(900px 700px at -10% 0%, #22d3ee10, transparent 60%),
+      var(--bg);
+  }
+
+  .container { max-width: 960px; margin: 32px auto; padding: 0 20px; }
+
+  .topbar {
+    display: flex; gap: 12px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow-1);
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 15px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--txt);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .brand-en {
+    font-size: 12px;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .brand-ko {
+    font-size: 18px;
+  }
+
+  .spacer { flex: 1; }
+
+  .field {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px; border: 1px solid var(--border);
+    border-radius: 10px; background: var(--elev-1);
+  }
+  .field input[type="number"]{
+    width: 96px;
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    outline: none;
+    color: var(--txt);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-align: right;
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+    font-family:
+      ui-rounded, ui-sans-serif,
+      "SF Pro Text","Inter","Segoe UI",
+      "Noto Sans KR", Roboto, AppleSDGothicNeo, system-ui, sans-serif;
+  }
+  .field:focus-within{
+    border-color: var(--accent);
+    box-shadow: var(--ring);
+  }
+  /* Edge スピンボタン削除 */
+  .field input[type="number"]::-webkit-outer-spin-button,
+  .field input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Firefox スピンボタン削除 */
+  .field input[type="number"]{
+    -moz-appearance: textfield;
+  }
+
+  .btn {
+    padding: 10px 14px; border-radius: 12px;
+    background: linear-gradient(180deg, var(--elev-2), var(--elev-1));
+    border: 1px solid var(--border); color: var(--txt);
+    cursor: pointer; transition: transform .08s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .btn:hover { border-color: var(--accent); box-shadow: var(--shadow-1); }
+  .btn:active { transform: translateY(1px) scale(.99); }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); }
+  .btn-accent {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, var(--elev-1)), var(--elev-1));
+    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+  }
+
+  .card {
+    margin-top: 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow-1); padding: 12px;
+  }
+
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .row {
+    display: grid;
+    grid-template-columns: 92px 1fr 92px 44px 44px;
+    gap: 12px; align-items: center; padding: 8px;
+    border-radius: 12px; background: linear-gradient(180deg, var(--elev-1), var(--surface));
+    border: 1px solid var(--border);
+  }
+  .row[draggable="true"] { cursor: grab; }
+  .row.dragging { opacity: .9; cursor: grabbing; }
+  .row.drag-over { outline: var(--ring); }
+
+  .copy-btn {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+    background: var(--elev-2); color: var(--txt); font-weight: 700; cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--accent); }
+  .copy-btn:active { transform: translateY(1px); }
+
+  .text-input {
+    width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--txt); outline: none;
+    transition: box-shadow .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .text-input:focus { border-color: var(--accent); box-shadow: var(--ring); }
+  .text-input.copied { background: var(--accent-weak); }
+
+  .count { justify-self: end; min-width: 82px; text-align: right; color: var(--txt-muted); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  .insert-btn{
+    width: 100%; height: 40px; border-radius: 10px; cursor: pointer;
+    background: var(--elev-1); color: var(--accent); font-weight: 800;
+    border: 1px dashed var(--accent);
+  }
+  .insert-btn:hover { background: color-mix(in srgb, var(--accent) 10%, var(--elev-1)); }
+  .delete-btn {
+    width: 100%; height: 40px; border-radius: 10px; cursor: pointer;
+    background: var(--elev-1); color: var(--danger); font-weight: 800;
+    border: 1px dashed var(--danger);
+  }
+  .delete-btn:hover {
+    background: color-mix(in srgb, var(--danger) 12%, var(--elev-1));
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  .hint {
+    margin-top: 12px; color: var(--txt-muted); font-size: 13px; line-height: 1.6;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px;
+  }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(8px);
+    background: var(--toast-bg); color: #fff;
+    padding: 10px 14px; border-radius: 12px;
+    opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s;
+    box-shadow: var(--shadow-2);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9999; backdrop-filter: blur(1.5px);
+  }
+  .modal {
+    width: min(440px, 92vw); background: var(--surface); color: var(--txt);
+    border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-2); padding: 18px;
+  }
+  .modal-header { display: flex; gap: 12px; align-items: center; margin-bottom: 8px; }
+  .modal-icon { width: 30px; height: 30px; color: var(--danger); }
+  .modal-title { font-weight: 800; }
+  .modal-body { color: var(--txt-muted); font-size: 14px; line-height: 1.6; white-space: pre-line; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+  .btn-danger {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--danger) 18%, var(--elev-1)), var(--elev-1));
+    border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); color: #fff;
+  }
+
+  /* Floating buttons (Discord ・ Help) */
+  .fab-wrap { position: fixed; right: 24px; bottom: 28px; z-index: 10000; display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+  .fab-btn {
+    width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
+    background: linear-gradient(180deg, var(--elev-2), var(--elev-1)); border: 1px solid var(--border);
+    box-shadow: var(--shadow-2); transition: transform .12s ease, border-color .2s ease, box-shadow .2s ease;
+    color: var(--txt); text-decoration: none; user-select: none;
+  }
+  .fab-btn:hover { transform: translateY(-2px) scale(1.02); border-color: var(--accent); }
+  .fab-btn img { width: 28px; height: 28px; display: block; }
+
+  /* ヘルプのポップアップ画面 */
+  .help-popup {
+    position: fixed; right: 96px; bottom: 104px;
+    width: min(420px, 86vw); max-height: 72vh; overflow: auto;
+    background: var(--surface); color: var(--txt);
+    border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-2);
+    padding: 16px; z-index: 9998; display: none;
+  }
+  .help-popup.show { display: block; }
+  .help-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .help-head h3 { margin: 0; font-size: 16px; font-weight: 800; }
+  .help-close { margin-left: auto; border: 1px solid var(--border); background: var(--elev-1); color: var(--txt); border-radius: 10px; padding: 6px 10px; cursor: pointer; }
+  .help-body { color: var(--txt-muted); font-size: 14px; line-height: 1.65; }
+  .help-body b { color: var(--txt); }
+  .help-body p { text-indent: 1em; }
+  .kbd { display: inline-block; border:1px solid var(--border); background: var(--elev-1); padding: 0 6px; border-radius: 6px; font-weight: 700; }
+</style>
+</head>
+
+
+
+<!-- 1️⃣ HTMLスタートポイント -->
+<body>
+  <!-- 構成要素 -->
+  <div class="container">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-en">AutoCopy</div>
+        <div class="brand-ko">오또카지</div>
+      </div>
+
+      <div class="field">
+        <label for="count" style="color:var(--txt-muted);font-weight:600;">개수</label>
+        <input id="count" type="number" value="5" min="1" max="999" />
+        <span aria-hidden="true" style="color:var(--txt-muted);font-weight:600;">줄</span>
+      </div>
+
+      <button class="btn btn-ghost" id="build">만들기</button>
+      <button class="btn btn-accent" id="paste">붙여넣기</button>
+      <button class="btn" id="clear">모두 지우기</button>
+
+      <div class="spacer"></div>
+
+      <button class="btn btn-ghost" id="themeToggle">
+        테마 
+        <span id="themeBadge" style="opacity:.7;margin-left:6px;">자동</span>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="list" id="list"></div>
+    </div>
+
+    <div class="hint">
+      • 복사해 온 문장을 붙여넣기 또는 직접 빈 칸에 붙여넣어 복사 할 준비를 한다.<br>
+      • 각 문장 좌측의 복사 버튼 또는 각 문장의 순번에 해당하는 숫자키를 눌러 복사한다.<br>
+      • 각 문장 좌측의 +는 아래로 빈 줄을 생성, X는 해당 줄을 삭제시킨다.<br>
+      • 각 문장은 드래그 앤 드롭으로 이동 시킬 수 있다.<br>
+      • 지정한 테마와 작성한 내용은 프로그램을 종료하여도 저장됩니다.
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-overlay" id="confirmOverlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-labelledby="confirmTitle" aria-modal="false">
+      <div class="modal-header">
+        <svg class="modal-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 3L1 21h22L12 3z" stroke="currentColor" stroke-width="1.5" />
+          <path d="M12 8v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="17.5" r="1.2" fill="currentColor"/>
+        </svg>
+        <div class="modal-title" id="confirmTitle">정말 초기화할까요?</div>
+      </div>
+      <div class="modal-body">
+        현재 입력된 모든 문장을 지우고 줄 수를 5개로 초기화합니다.
+        이 작업은 되돌릴 수 없습니다.
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="confirmCancel">취소</button>
+        <button class="btn btn-danger" id="confirmOk">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 案内・お問い合わせ窓口 -->
+  <div class="fab-wrap">
+    <!-- Help FAB -->
+    <button id="helpBtn" class="fab-btn" aria-expanded="false">?</button>
+    <!-- Discord FAB -->
+    <a class="fab-btn" href="discord://discord.com/users/1231727418000015465" rel="noopener">
+      <img src="https://cdn.discordapp.com/attachments/1407222671120400438/1407238044049997864/discord.png?ex=68a5600e&is=68a40e8e&hm=e2dc46466827cd2e2bb10883dd692e987a3a4e32c3cabd3e28092173a25e9c72&" alt="Discord" />
+    </a>
+  </div>
+
+  <!-- 案内・取説確認ページ -->
+  <div id="helpPopup" class="help-popup" role="dialog" aria-modal="false" aria-labelledby="helpTitle">
+    <div class="help-head">
+      <h3 id="helpTitle">이용 방법</h3>
+      <button class="help-close" id="helpClose" aria-label="도움말 닫기">닫기</button>
+    </div>
+    <div class="help-body">
+      1️⃣<b> 기본 흐름</b><br>
+      １．복사한 문장의 개수를 지정 후 빈 줄 만들기<br>
+      　　또는 붙여넣기로 일괄 채우기<br>
+      ２．각 문장 좌측 복사 버튼으로 복사하기<br>
+      　　또는 숫자키를 눌러 해당 문장 복사하기<br>
+      　　(Shift + 숫자를 통해 9보다 큰 숫자도 복사 가능)<br><br>
+
+      2️⃣<b> 핵심 기능</b><br>
+      　• <b>숫자키 1~9</b>를 누르면 해당 문자 즉시 복사<br>
+      　　<b>Shift</b> 누른 상태에서 숫자 여러 개 누른 후<br>
+      　　→ Shift를 떼면 해당 번호 복사<br>
+      　• 줄 우측 <b>+</b>로 <b>아래에 새로운 줄 삽입</b><br>
+      　• 줄 우측 <b>x</b>로 <b>해당 줄 삭제</b><br>
+      　• 줄 외곽을 잡고 <b>드래그</b>로 순서 변경<br>
+      　• 각 줄 우측에 <b>글자 수</b> 표시, 복사 시 하이라이트<br><br>
+
+      3️⃣<b> 관리</b><br>
+      　• <b>모두 지우기</b> 실행 시 내용을 지우고 작성 가능 줄을 5개로 조정<br>
+      　• <b>라이트/다크/자동</b> 테마 전환</p>
+      ⭐ 내용/줄 수/테마는 <b>자동 저장</b>되어 재실행해도 복원됩니다.
+    </div>
+  </div>
+
+  <!-- 構成スクリプト -->
+<script>
+  const list = document.getElementById('list');
+  const countInput = document.getElementById('count');
+  const buildBtn = document.getElementById('build');
+  const pasteBtn = document.getElementById('paste');
+  const clearBtn = document.getElementById('clear');
+  const toast = document.getElementById('toast');
+  const themeToggle = document.getElementById('themeToggle');
+  const themeBadge = document.getElementById('themeBadge');
+
+  const helpBtn = document.getElementById('helpBtn');
+  const helpPopup = document.getElementById('helpPopup');
+  const helpClose = document.getElementById('helpClose');
+
+  const STORAGE_KEY = "sentence_manager_v3";
+  const THEME_KEY = "sentence_manager_theme"; // 'light' | 'dark' | 'auto'
+
+  /* お知らせ */
+  const showToast = (msg='완료!')=>{
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'), 1000);
+  };
+
+  /* 保存遅延 */
+  function debounce(fn, ms=200){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+  const saveDataDebounced = debounce(saveData, 200);
+
+  /* テキストコピー　及びコピー失敗対策 */
+  async function safeCopy(text){
+    try{
+      await navigator.clipboard.writeText(text);
+    }catch{
+      const ta=document.createElement('textarea');
+      ta.value=text; ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      const ok=document.execCommand('copy'); document.body.removeChild(ta);
+      if (!ok) throw new Error('copy failed');
+    }
+  }
+
+  /* セーブデータ */
+  function saveData(){
+    const values = Array.from(list.querySelectorAll('.text-input')).map(i => i.value);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({count: values.length, values}));
+  }
+  function loadData(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || null; }
+    catch { return null; }
+  }
+
+  /* 文字数測定 */
+  function updateCount(inputEl, countEl){ countEl.textContent = `${inputEl.value.length} 글자`; }
+
+  /* ---- 空きテキストライン生成 ---- */
+  function makeRowElement(i, value=''){
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.setAttribute('draggable','true');
+
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = `복사 ${i}`;
+    btn.dataset.idx = i;
+
+    const input = document.createElement('input');
+    input.className = 'text-input';
+    input.type = 'text';
+    input.placeholder = `문장 #${i}`;
+    input.value = value || '';
+
+    const cnt = document.createElement('div');
+    cnt.className = 'count';
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'insert-btn';
+    addBtn.textContent = '+';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'delete-btn';
+    delBtn.textContent = '×';
+  /* ----------------------------------------- ---- */
+
+    /* ---- 文字入力・保存 ---- */
+    input.addEventListener('input', ()=>{ updateCount(input,cnt); saveDataDebounced(); });
+
+    /* ---- コピー ---- */
+    btn.addEventListener('click', async ()=>{
+      try{
+        await safeCopy(input.value);
+        input.classList.add('copied');
+        setTimeout(()=>input.classList.remove('copied'), 500);
+        const idx = btn.dataset.idx || Array.from(list.children).indexOf(row)+1;
+        showToast(`${idx}번째 줄 복사됨`);
+      }catch{ showToast('복사 실패'); }
+    });
+
+    /* ---- 追加　+ ---- */
+    addBtn.addEventListener('click', ()=>{
+      insertRowAfter(row);
+      renumberRows();
+      saveDataDebounced();
+      showToast('줄 삽입');
+    });
+
+    /* ---- 削除　ｘ ---- */
+    delBtn.addEventListener('click', ()=>{
+      const idx = Array.from(list.children).indexOf(row) + 1;
+      row.remove();
+      renumberRows();
+      saveDataDebounced();
+      const total = list.querySelectorAll('.row').length;
+      countInput.value = total;
+      showToast(`${idx}번째 줄 삭제됨`);
+    });
+
+    /* ---- テキストライン移動　ドラッグアンドドロップ ---- */
+    row.addEventListener('dragstart', (e)=>{
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    row.addEventListener('dragend', ()=>{
+      row.classList.remove('dragging');
+      document.querySelectorAll('.row.drag-over').forEach(el => el.classList.remove('drag-over'));
+      renumberRows();
+      saveDataDebounced();
+    });
+    row.addEventListener('dragover', (e)=>{
+      e.preventDefault();
+      const dragging = list.querySelector('.dragging');
+      if (!dragging || dragging===row) return;
+      document.querySelectorAll('.row.drag-over').forEach(el => el.classList.remove('drag-over'));
+      row.classList.add('drag-over');
+      const rect = row.getBoundingClientRect();
+      const before = (e.clientY - rect.top) < rect.height/2;
+      if (before) list.insertBefore(dragging, row);
+      else list.insertBefore(dragging, row.nextSibling);
+    });
+    row.addEventListener('dragleave', ()=>row.classList.remove('drag-over'));
+    row.addEventListener('drop', (e)=>{ e.preventDefault(); row.classList.remove('drag-over'); });
+
+    row.appendChild(btn);
+    row.appendChild(input);
+    row.appendChild(cnt);
+    row.appendChild(addBtn);
+    row.appendChild(delBtn);
+
+    updateCount(input,cnt);
+    return row;
+  }
+
+
+
+  function createRow(i, value=''){
+    const row = makeRowElement(i, value);
+    list.appendChild(row);
+    return row;
+  }
+
+  function insertRowAfter(row){
+    const idx = Array.from(list.children).indexOf(row) + 2;
+    const newRow = makeRowElement(idx, '');
+    list.insertBefore(newRow, row.nextSibling);
+  }
+
+  function buildRows(n, preserve=true, prevValues=[]){
+    const keep = preserve ? Array.from(list.querySelectorAll('.text-input')).map(i=>i.value) : prevValues;
+    list.innerHTML = '';
+    for (let i=1;i<=n;i++) list.appendChild(makeRowElement(i, keep[i-1] ?? ''));
+    renumberRows();
+    saveDataDebounced();
+  }
+
+  function renumberRows(){
+    const rows = Array.from(list.querySelectorAll('.row'));
+    rows.forEach((row,idx)=>{
+      const i = idx+1;
+      const btn = row.querySelector('.copy-btn');
+      const input = row.querySelector('.text-input');
+      btn.dataset.idx = i; btn.textContent = `복사 ${i}`;
+      input.placeholder = `문장 #${i}`;
+    });
+    countInput.value = rows.length;
+  }
+
+  /* テーマ */
+  function applyTheme(mode){
+    const root = document.documentElement;
+    if (mode==='light' || mode==='dark'){
+      root.setAttribute('data-theme', mode);
+      themeBadge.textContent = mode==='light' ? '라이트' : '다크';
+    }else{
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+      themeBadge.textContent = '자동';
+    }
+  }
+  function cycleTheme(){
+    const cur = localStorage.getItem(THEME_KEY) || 'auto';
+    const next = cur==='light' ? 'dark' : cur==='dark' ? 'auto' : 'light';
+    localStorage.setItem(THEME_KEY, next);
+    applyTheme(next);
+    showToast(`테마: ${ next==='light'?'라이트': next==='dark'?'다크':'자동' }`);
+  }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', ()=>{
+    const mode = localStorage.getItem(THEME_KEY) || 'auto';
+    if (mode==='auto') applyTheme('auto');
+  });
+
+  function openConfirm(){
+    return new Promise((resolve)=>{
+      const overlay = document.getElementById('confirmOverlay');
+      const modal = overlay.querySelector('.modal');
+      const ok = document.getElementById('confirmOk');
+      const cancel = document.getElementById('confirmCancel');
+
+      const focusables = modal.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])');
+      let fIdx = 0;
+
+      const close = (res)=>{
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden','true');
+        modal.setAttribute('aria-modal','false');
+        ok.removeEventListener('click', onOk);
+        cancel.removeEventListener('click', onCancel);
+        overlay.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onKey);
+        resolve(res);
+      };
+      const onOk = ()=>close(true);
+      const onCancel = ()=>close(false);
+      const onBackdrop = (e)=>{ if (e.target===overlay) close(false); };
+      const onKey = (e)=>{
+        if (e.key==='Escape') return close(false);
+        if (e.key==='Enter') return close(true);
+        if (e.key==='Tab'){
+          e.preventDefault();
+          fIdx = (fIdx + (e.shiftKey?-1:1) + focusables.length) % focusables.length;
+          focusables[fIdx].focus();
+        }
+      };
+
+      overlay.style.display = 'flex';
+      overlay.setAttribute('aria-hidden','false');
+      modal.setAttribute('aria-modal','true');
+      ok.addEventListener('click', onOk);
+      cancel.addEventListener('click', onCancel);
+      overlay.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onKey);
+      ok.focus();
+    });
+  }
+
+  function toggleHelp(force){
+    const willShow = force ?? !helpPopup.classList.contains('show');
+    helpPopup.classList.toggle('show', willShow);
+    helpBtn.setAttribute('aria-expanded', String(willShow));
+  }
+  helpBtn.addEventListener('click', ()=> toggleHelp());
+  helpClose.addEventListener('click', ()=> toggleHelp(false));
+  window.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape' && helpPopup.classList.contains('show')) toggleHelp(false);
+  });
+  window.addEventListener('click', (e)=>{
+    if (helpPopup.classList.contains('show')) {
+      const withinPopup = helpPopup.contains(e.target);
+      const onButton = helpBtn.contains(e.target);
+      if (!withinPopup && !onButton) toggleHelp(false);
+    }
+  });
+
+  (function init(){
+    applyTheme(localStorage.getItem(THEME_KEY) || 'auto');
+    const saved = loadData();
+    if (saved){ countInput.value = saved.count; buildRows(saved.count, false, saved.values); }
+    else { buildRows(Number(countInput.value)||5, false); }
+  })();
+
+  buildBtn.addEventListener('click', ()=>{
+    const n = Math.max(1, Math.min(999, Number(countInput.value)||1));
+    countInput.value = n; buildRows(n, true);
+  });
+  countInput.addEventListener('keydown', (e)=>{ if (e.key==='Enter') buildBtn.click(); });
+
+  pasteBtn.addEventListener('click', async ()=>{
+    try {
+      const txt = await navigator.clipboard.readText();
+      if (!txt) { showToast('클립보드가 비어있어요'); return; }
+      let lines = txt.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')
+        .filter(s => s.trim() !== '');
+
+      if (lines.length === 0) { showToast('붙여넣을 내용이 없어요'); return; }
+
+      const cur = list.querySelectorAll('.row').length;
+      if (lines.length > cur) buildRows(lines.length, true);
+      const rows = Array.from(list.querySelectorAll('.row'));
+      lines.forEach((t,i)=>{
+        const input = rows[i].querySelector('.text-input');
+        const cnt = rows[i].querySelector('.count');
+        input.value = t; updateCount(input,cnt);
+      });
+      saveDataDebounced();
+      showToast(`${lines.length}개 붙여넣음`);
+    } catch { showToast('붙여넣기 실패 (권한 확인)'); }
+  });
+
+  clearBtn.addEventListener('click', async ()=>{
+    const ok = await openConfirm();
+    if (!ok) return;
+    countInput.value = 5;
+    buildRows(5, false, []);
+    showToast('전체 초기화');
+  });
+
+  themeToggle.addEventListener('click', cycleTheme);
+
+  function uiLocked(){
+    const overlay = document.getElementById('confirmOverlay');
+    const modalOpen = overlay && overlay.style.display==='flex';
+    const helpOpen = helpPopup.classList.contains('show');
+    return modalOpen || helpOpen;
+  }
+
+  let shiftBuffer = '';
+  window.addEventListener('keydown', (e)=>{
+    if (uiLocked()) return;
+    const tag = (e.target.tagName||'').toUpperCase();
+    if (tag==='INPUT' || e.metaKey || e.ctrlKey || e.altKey) return;
+
+    const digit = /^\d$/.test(e.key);
+    if (!digit) return;
+
+    if (e.shiftKey){
+      e.preventDefault();
+      shiftBuffer += e.key;
+      return;
+    }
+
+    const n = Number(e.key);
+    if (n>=1 && n<=9){
+      e.preventDefault();
+      const btn = list.querySelector(`.row:nth-child(${n}) .copy-btn`);
+      if (btn) btn.click(); else showToast(`${n}번째 줄 없음`);
+    }
+  });
+  window.addEventListener('keyup', (e)=>{
+    if (e.key!=='Shift') return;
+    if (!shiftBuffer) return;
+    const idx = Number(shiftBuffer);
+    shiftBuffer = '';
+    if (Number.isInteger(idx) && idx>0){
+      const btn = list.querySelector(`.row:nth-child(${idx}) .copy-btn`);
+      if (btn) btn.click(); else showToast(`${idx}번째 줄 없음`);
+    }
+  });
+</script>
+</body>
+</html>
